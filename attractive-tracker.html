@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PlaceTrack Pro - Smart Career Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        
+        /* Login Screen */
+        .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); max-width: 400px; width: 100%; text-align: center; }
+        .logo { font-size: 48px; margin-bottom: 10px; }
+        .login-title { font-size: 28px; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .login-subtitle { color: #666; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; }
+        .form-input { width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 10px; font-size: 16px; transition: border-color 0.3s; }
+        .form-input:focus { outline: none; border-color: #667eea; }
+        .login-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+        .login-btn:hover { transform: translateY(-2px); }
+        
+        /* Main App */
+        .app { display: none; min-height: 100vh; background: #f8fafc; }
+        .navbar { background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { font-size: 24px; font-weight: bold; color: #667eea; }
+        .nav-user { display: flex; align-items: center; gap: 15px; }
+        .user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        
+        .sidebar { position: fixed; left: 0; top: 70px; width: 250px; height: calc(100vh - 70px); background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.1); padding: 20px 0; }
+        .nav-item { padding: 15px 30px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 10px; }
+        .nav-item:hover, .nav-item.active { background: #f1f5f9; border-right: 3px solid #667eea; }
+        .nav-icon { font-size: 20px; }
+        
+        .main-content { margin-left: 250px; padding: 30px; }
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); text-align: center; position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #667eea, #764ba2); }
+        .stat-number { font-size: 36px; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .stat-label { color: #666; font-size: 14px; }
+        .stat-icon { font-size: 48px; opacity: 0.1; position: absolute; top: 20px; right: 20px; }
+        
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .card-header { display: flex; justify-content: between; align-items: center; margin-bottom: 20px; }
+        .card-title { font-size: 20px; font-weight: 600; color: #333; }
+        
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .btn-success { background: #10b981; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        
+        .progress-circle { width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(#667eea 0deg, #e5e7eb 0deg); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; position: relative; }
+        .progress-circle::before { content: ''; position: absolute; width: 80px; height: 80px; background: white; border-radius: 50%; }
+        .progress-text { position: relative; z-index: 1; font-size: 18px; font-weight: bold; color: #333; }
+        
+        .achievement { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; padding: 15px; border-radius: 10px; margin: 10px 0; display: flex; align-items: center; gap: 15px; }
+        .achievement-icon { font-size: 24px; }
+        
+        .notification { background: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        
+        .company-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 15px; transition: transform 0.3s; }
+        .company-card:hover { transform: translateY(-5px); }
+        .company-logo { width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-bottom: 15px; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #667eea; }
+        
+        .hidden { display: none !important; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-card fade-in">
+            <div class="logo">🎓</div>
+            <h1 class="login-title">PlaceTrack Pro</h1>
+            <p class="login-subtitle">Your Smart Career Development Platform</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="userName" class="form-input" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="userEmail" class="form-input" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label>College/University</label>
+                    <input type="text" id="userCollege" class="form-input" placeholder="Enter your college name" required>
+                </div>
+                <div class="form-group">
+                    <label>Graduation Year</label>
+                    <select id="gradYear" class="form-input" required>
+                        <option value="">Select Year</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                </div>
+                <button type="submit" class="login-btn">Start Your Journey 🚀</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="app">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-brand">🎓 PlaceTrack Pro</div>
+            <div class="nav-user">
+                <span id="welcomeText">Welcome!</span>
+                <div class="user-avatar" id="userAvatar">U</div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="nav-item active" onclick="showPage('dashboard')">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="showPage('resume')">
+                <span class="nav-icon">📄</span>
+                <span>Resume Tracker</span>
+            </div>
+            <div class="nav-item" onclick="showPage('skills')">
+                <span class="nav-icon">🧠</span>
+                <span>Skills & Tests</span>
+            </div>
+            <div class="nav-item" onclick="showPage('companies')">
+                <span class="nav-icon">🏢</span>
+                <span>Companies</span>
+            </div>
+            <div class="nav-item" onclick="showPage('interview')">
+                <span class="nav-icon">🎤</span>
+                <span>Interview Prep</span>
+            </div>
+            <div class="nav-item" onclick="showPage('achievements')">
+                <span class="nav-icon">🏆</span>
+                <span>Achievements</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <h1>Welcome to Your Career Dashboard</h1>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📄</div>
+                        <div class="stat-number" id="resumeStatScore">--</div>
+                        <div class="stat-label">Resume Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🧠</div>
+                        <div class="stat-number" id="skillsStatScore">--</div>
+                        <div class="stat-label">Avg Test Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏢</div>
+                        <div class="stat-number" id="applicationsCount">0</div>
+                        <div class="stat-label">Applications</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-number" id="readinessScore">--</div>
+                        <div class="stat-label">Overall Readiness</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Career Progress</h2>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="progress-circle" id="overallProgress">
+                            <div class="progress-text" id="progressText">0%</div>
+                        </div>
+                        <p>Keep going! You're making great progress.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Recent Achievements</h2>
+                    <div id="recentAchievements">
+                        <div class="achievement">
+                            <div class="achievement-icon">🎉</div>
+                            <div>
+                                <strong>Welcome to PlaceTrack Pro!</strong><br>
+                                <small>Start your career journey today</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Quick Actions</h2>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="showPage('resume')">📄 Upload Resume</button>
+                        <button class="btn btn-success" onclick="showPage('skills')">🧠 Take Test</button>
+                        <button class="btn btn-warning" onclick="showPage('companies')">🏢 Browse Jobs</button>
+                        <button class="btn btn-danger" onclick="showPage('interview')">🎤 Practice Interview</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Page -->
+            <div id="resume" class="page">
+                <h1>📄 Resume Quality Tracker</h1>
+                
+                <div class="card">
+                    <h2 class="card-title">Upload & Analyze Resume</h2>
+                    <input type="file" id="resumeFile" class="form-input" accept=".pdf,.doc,.docx">
+                    <button class="btn btn-primary" onclick="analyzeResume()">🤖 AI Analysis</button>
+                    
+                    <div id="resumeResults" style="margin-top: 20px;">
+                        <div style="text-align: center;">
+                            <div class="progress-circle" id="resumeProgress">
+                                <div class="progress-text" id="resumeProgressText">0%</div>
+                            </div>
+                        </div>
+                        <div id="resumeFeedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Page -->
+            <div id="skills" class="page">
+                <h1>🧠 Skills & Aptitude Tests</h1>
+                
+                <div class="card">
+                    <h2 class="card-title">Take Aptitude Test</h2>
+                    <div class="form-grid">
+                        <select id="testType" class="form-select">
+                            <option>Quantitative Aptitude</option>
+                            <option>Logical Reasoning</option>
+                            <option>Verbal Ability</option>
+                            <option>Technical Skills</option>
+                            <option>Programming</option>
+                        </select>
+                        <input type="number" id="testScore" class="form-input" placeholder="Score (0-100)">
+                        <button class="btn btn-primary" onclick="addTestScore()">Add Score</button>
+                    </div>
+                    <div id="testResults" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- Companies Page -->
+            <div id="companies" class="page">
+                <h1>🏢 Company Applications</h1>
+                
+                <div id="companiesList">
+                    <div class="company-card">
+                        <div class="company-logo">G</div>
+                        <h3>Google</h3>
+                        <p><strong>Package:</strong> ₹25 LPA</p>
+                        <p><strong>Deadline:</strong> March 15, 2024</p>
+                        <p><strong>Requirements:</strong> React, Node.js, System Design</p>
+                        <button class="btn btn-primary" onclick="applyToCompany('Google')">Apply Now</button>
+                    </div>
+                    
+                    <div class="company-card">
+                        <div class="company-logo">M</div>
+                        <h3>Microsoft</h3>
+                        <p><strong>Package:</strong> ₹22 LPA</p>
+                        <p><strong>Deadline:</strong> March 20, 2024</p>
+                        <p><strong>Requirements:</strong> C#, Azure, .NET</p>
+                        <button class="btn btn-primary" onclick="applyToCompany('Microsoft')">Apply Now</button>
+                    </div>
+                    
+                    <div class="company-card">
+                        <div class="company-logo">A</div>
+                        <h3>Amazon</h3>
+                        <p><strong>Package:</strong> ₹20 LPA</p>
+                        <p><strong>Deadline:</strong> March 25, 2024</p>
+                        <p><strong>Requirements:</strong> Java, AWS, Algorithms</p>
+                        <button class="btn btn-primary" onclick="applyToCompany('Amazon')">Apply Now</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interview Page -->
+            <div id="interview" class="page">
+                <h1>🎤 Interview Preparation</h1>
+                
+                <div class="card">
+                    <h2 class="card-title">Mock Interview</h2>
+                    <p>Practice with AI-powered mock interviews</p>
+                    <button class="btn btn-primary" onclick="startMockInterview()">🎯 Start Mock Interview</button>
+                    <button class="btn btn-success" onclick="assessCommunication()">💬 Communication Test</button>
+                    
+                    <div id="interviewResults" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- Achievements Page -->
+            <div id="achievements" class="page">
+                <h1>🏆 Your Achievements</h1>
+                
+                <div class="card">
+                    <h2 class="card-title">Certifications</h2>
+                    <div class="form-grid">
+                        <input type="text" id="certName" class="form-input" placeholder="Certification Name">
+                        <input type="text" id="certIssuer" class="form-input" placeholder="Issuing Organization">
+                        <button class="btn btn-primary" onclick="addCertification()">Add Certification</button>
+                    </div>
+                    <div id="certifications" style="margin-top: 20px;"></div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Projects</h2>
+                    <div class="form-grid">
+                        <input type="text" id="projectName" class="form-input" placeholder="Project Name">
+                        <textarea id="projectDesc" class="form-textarea" placeholder="Project Description" rows="3"></textarea>
+                        <button class="btn btn-primary" onclick="addProject()">Add Project</button>
+                    </div>
+                    <div id="projects" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userData = {
+            name: '',
+            email: '',
+            college: '',
+            gradYear: '',
+            resume: { score: 0, feedback: [] },
+            tests: [],
+            certifications: [],
+            projects: [],
+            applications: [],
+            interview: { score: 0 }
+        };
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            userData.name = document.getElementById('userName').value;
+            userData.email = document.getElementById('userEmail').value;
+            userData.college = document.getElementById('userCollege').value;
+            userData.gradYear = document.getElementById('gradYear').value;
+            
+            localStorage.setItem('userData', JSON.stringify(userData));
+            
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            
+            document.getElementById('welcomeText').textContent = `Welcome, ${userData.name}!`;
+            document.getElementById('userAvatar').textContent = userData.name.charAt(0).toUpperCase();
+            
+            updateDashboard();
+        });
+
+        // Check if user is already logged in
+        window.onload = function() {
+            const saved = localStorage.getItem('userData');
+            if (saved) {
+                userData = JSON.parse(saved);
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('welcomeText').textContent = `Welcome, ${userData.name}!`;
+                document.getElementById('userAvatar').textContent = userData.name.charAt(0).toUpperCase();
+                updateDashboard();
+            }
+        };
+
+        function logout() {
+            localStorage.removeItem('userData');
+            location.reload();
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById(pageId).classList.add('active');
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        function analyzeResume() {
+            const file = document.getElementById('resumeFile').files[0];
+            if (!file) return alert('Please select a resume file');
+            
+            setTimeout(() => {
+                const score = Math.floor(Math.random() * 30) + 70;
+                const feedback = [
+                    score > 85 ? "✅ Excellent formatting and structure" : "⚠️ Improve formatting and layout",
+                    score > 80 ? "✅ Strong technical keywords" : "⚠️ Add more relevant technical keywords",
+                    score > 75 ? "✅ Good project descriptions" : "⚠️ Enhance project descriptions with metrics"
+                ];
+                
+                userData.resume = { score, feedback };
+                updateResumeDisplay();
+                updateDashboard();
+                saveData();
+                
+                addAchievement("📄 Resume Analyzed", "AI analysis completed successfully");
+            }, 2000);
+        }
+
+        function updateResumeDisplay() {
+            const score = userData.resume.score;
+            document.getElementById('resumeProgressText').textContent = `${score}%`;
+            document.getElementById('resumeProgress').style.background = 
+                `conic-gradient(#667eea ${score * 3.6}deg, #e5e7eb ${score * 3.6}deg)`;
+            
+            const feedbackHtml = userData.resume.feedback.map(f => 
+                `<div class="notification">${f}</div>`
+            ).join('');
+            document.getElementById('resumeFeedback').innerHTML = feedbackHtml;
+        }
+
+        function addTestScore() {
+            const type = document.getElementById('testType').value;
+            const score = parseInt(document.getElementById('testScore').value);
+            
+            if (!score || score < 0 || score > 100) return alert('Enter valid score (0-100)');
+            
+            userData.tests.push({ type, score, date: new Date().toLocaleDateString() });
+            updateTestDisplay();
+            updateDashboard();
+            saveData();
+            
+            document.getElementById('testScore').value = '';
+            addAchievement("🧠 Test Completed", `${type}: ${score}/100`);
+        }
+
+        function updateTestDisplay() {
+            const testsHtml = userData.tests.map(test => `
+                <div class="notification">
+                    <strong>${test.type}</strong>: ${test.score}/100 (${test.date})
+                </div>
+            `).join('');
+            document.getElementById('testResults').innerHTML = testsHtml;
+        }
+
+        function applyToCompany(company) {
+            userData.applications.push({ company, date: new Date().toLocaleDateString() });
+            updateDashboard();
+            saveData();
+            addAchievement("🏢 Application Sent", `Applied to ${company}`);
+            alert(`Successfully applied to ${company}!`);
+        }
+
+        function startMockInterview() {
+            setTimeout(() => {
+                const score = Math.floor(Math.random() * 25) + 70;
+                userData.interview.score = Math.max(userData.interview.score, score);
+                
+                document.getElementById('interviewResults').innerHTML = `
+                    <div class="notification">
+                        <strong>Mock Interview Complete!</strong><br>
+                        Score: ${score}/100<br>
+                        ${score > 85 ? "Excellent performance!" : score > 70 ? "Good job, keep practicing!" : "More practice needed"}
+                    </div>
+                `;
+                
+                updateDashboard();
+                saveData();
+                addAchievement("🎤 Interview Practiced", `Score: ${score}/100`);
+            }, 3000);
+        }
+
+        function assessCommunication() {
+            setTimeout(() => {
+                document.getElementById('interviewResults').innerHTML += `
+                    <div class="notification">
+                        <strong>Communication Assessment Complete!</strong><br>
+                        ✅ Clear speech patterns<br>
+                        ✅ Good listening skills<br>
+                        ⚠️ Work on confidence
+                    </div>
+                `;
+                addAchievement("💬 Communication Assessed", "Assessment completed");
+            }, 2000);
+        }
+
+        function addCertification() {
+            const name = document.getElementById('certName').value;
+            const issuer = document.getElementById('certIssuer').value;
+            
+            if (!name || !issuer) return alert('Fill all fields');
+            
+            userData.certifications.push({ name, issuer, date: new Date().toLocaleDateString() });
+            updateCertificationsDisplay();
+            saveData();
+            
+            document.getElementById('certName').value = '';
+            document.getElementById('certIssuer').value = '';
+            addAchievement("🏆 Certification Added", name);
+        }
+
+        function updateCertificationsDisplay() {
+            const html = userData.certifications.map(cert => `
+                <div class="notification">
+                    <strong>${cert.name}</strong><br>
+                    Issued by: ${cert.issuer} (${cert.date})
+                </div>
+            `).join('');
+            document.getElementById('certifications').innerHTML = html;
+        }
+
+        function addProject() {
+            const name = document.getElementById('projectName').value;
+            const desc = document.getElementById('projectDesc').value;
+            
+            if (!name || !desc) return alert('Fill all fields');
+            
+            userData.projects.push({ name, desc, date: new Date().toLocaleDateString() });
+            updateProjectsDisplay();
+            saveData();
+            
+            document.getElementById('projectName').value = '';
+            document.getElementById('projectDesc').value = '';
+            addAchievement("💻 Project Added", name);
+        }
+
+        function updateProjectsDisplay() {
+            const html = userData.projects.map(project => `
+                <div class="notification">
+                    <strong>${project.name}</strong><br>
+                    ${project.desc} (${project.date})
+                </div>
+            `).join('');
+            document.getElementById('projects').innerHTML = html;
+        }
+
+        function addAchievement(title, desc) {
+            const achievement = `
+                <div class="achievement fade-in">
+                    <div class="achievement-icon">🎉</div>
+                    <div>
+                        <strong>${title}</strong><br>
+                        <small>${desc}</small>
+                    </div>
+                </div>
+            `;
+            document.getElementById('recentAchievements').innerHTML = achievement + document.getElementById('recentAchievements').innerHTML;
+        }
+
+        function updateDashboard() {
+            document.getElementById('resumeStatScore').textContent = userData.resume.score || '--';
+            
+            const avgTest = userData.tests.length ? 
+                Math.round(userData.tests.reduce((sum, test) => sum + test.score, 0) / userData.tests.length) : '--';
+            document.getElementById('skillsStatScore').textContent = avgTest;
+            
+            document.getElementById('applicationsCount').textContent = userData.applications.length;
+            
+            const overall = calculateOverallScore();
+            document.getElementById('readinessScore').textContent = overall;
+            document.getElementById('progressText').textContent = `${overall}%`;
+            document.getElementById('overallProgress').style.background = 
+                `conic-gradient(#667eea ${overall * 3.6}deg, #e5e7eb ${overall * 3.6}deg)`;
+        }
+
+        function calculateOverallScore() {
+            const resumeScore = userData.resume.score || 0;
+            const avgTestScore = userData.tests.length ? 
+                userData.tests.reduce((sum, test) => sum + test.score, 0) / userData.tests.length : 0;
+            const experienceScore = (userData.certifications.length * 10) + (userData.projects.length * 15);
+            const interviewScore = userData.interview.score || 0;
+            
+            return Math.round((resumeScore * 0.3) + (avgTestScore * 0.3) + (Math.min(experienceScore, 100) * 0.2) + (interviewScore * 0.2));
+        }
+
+        function saveData() {
+            localStorage.setItem('userData', JSON.stringify(userData));
+        }
+    </script>
+</body>
+</html>

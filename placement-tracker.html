@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Placement Tracker</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        const CollegePlacementTracker = () => {
+            const [user, setUser] = useState("");
+            const [resumeScore, setResumeScore] = useState(null);
+            const [aptitude, setAptitude] = useState("");
+            const [interviewRating, setInterviewRating] = useState("");
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [aiInsights, setAiInsights] = useState([]);
+            const [notifications, setNotifications] = useState([]);
+            const [image, setImage] = useState(null);
+            const [aiResult, setAiResult] = useState('');
+            const [listening, setListening] = useState(false);
+            const [voiceTranscript, setVoiceTranscript] = useState('');
+            const fileInputRef = useRef();
+
+            const companies = [
+                { id: 1, name: 'Google', package: '25 LPA', deadline: '2024-02-15', type: 'Tech' },
+                { id: 2, name: 'Microsoft', package: '22 LPA', deadline: '2024-02-20', type: 'Tech' },
+                { id: 3, name: 'Amazon', package: '20 LPA', deadline: '2024-02-25', type: 'Tech' },
+                { id: 4, name: 'TCS', package: '3.5 LPA', deadline: '2024-03-01', type: 'Service' }
+            ];
+
+            const handleLogin = (e) => {
+                e.preventDefault();
+                if (user.trim()) {
+                    localStorage.setItem("user", user);
+                    window.location.reload();
+                }
+            };
+
+            const addNotification = (message) => {
+                const notification = {
+                    id: Date.now(),
+                    message,
+                    time: new Date().toLocaleTimeString()
+                };
+                setNotifications([notification, ...notifications.slice(0, 4)]);
+            };
+
+            const handleResumeUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const score = Math.floor(Math.random() * 40) + 60;
+                    setResumeScore(score);
+                    addNotification(`Resume uploaded - Score: ${score}/100`);
+                }
+            };
+
+            const analyzeImage = () => {
+                const file = fileInputRef.current.files[0];
+                if (file) {
+                    setImage(URL.createObjectURL(file));
+                    setTimeout(() => {
+                        const results = [
+                            "Resume Analysis: Strong technical background in React, Node.js. Experience: 2 years. Recommendation: Apply to mid-level positions.",
+                            "Certificate Analysis: AWS Certified Developer certification. Relevant for DevOps roles.",
+                            "Project Screenshot: Modern web application with React framework. Good portfolio piece."
+                        ];
+                        const result = results[Math.floor(Math.random() * results.length)];
+                        setAiResult(result);
+                        setAiInsights([...aiInsights, { id: Date.now(), result, timestamp: new Date().toLocaleString() }]);
+                        addNotification("AI Analysis completed");
+                    }, 2000);
+                }
+            };
+
+            const startVoiceCommand = () => {
+                setListening(true);
+                setTimeout(() => {
+                    const commands = [
+                        "Show my application status",
+                        "Schedule interview with Google", 
+                        "Add skill JavaScript level 8",
+                        "Take aptitude mock test"
+                    ];
+                    const command = commands[Math.floor(Math.random() * commands.length)];
+                    setVoiceTranscript(command);
+                    addNotification(`Voice: ${command}`);
+                    setListening(false);
+                }, 2000);
+            };
+
+            const generateAIInsight = () => {
+                const insights = [
+                    "85% chance of success at TCS based on your profile",
+                    "Improve JavaScript skills for better Google application success", 
+                    "Best time to apply: Next 2 weeks based on hiring trends",
+                    "Focus on system design preparation for upcoming interviews"
+                ];
+                const insight = insights[Math.floor(Math.random() * insights.length)];
+                setAiInsights([...aiInsights, { id: Date.now(), result: insight, timestamp: new Date().toLocaleString() }]);
+                addNotification("AI Insight generated");
+            };
+
+            const readinessScore = Math.round(
+                (resumeScore || 0) * 0.4 +
+                (Number(aptitude) || 0) * 0.3 +
+                (Number(interviewRating) || 0) * 0.3
+            );
+
+            if (!localStorage.getItem("user")) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                        <form onSubmit={handleLogin} className="bg-white p-6 rounded-2xl shadow-md max-w-md w-full">
+                            <h1 className="text-2xl font-bold mb-4 text-center">🎓 College Placement Tracker</h1>
+                            <input
+                                type="text"
+                                placeholder="Enter your name"
+                                value={user}
+                                onChange={(e) => setUser(e.target.value)}
+                                className="border p-3 rounded w-full mb-4"
+                                required
+                            />
+                            <button
+                                type="submit"
+                                className="bg-blue-500 text-white px-4 py-3 rounded w-full hover:bg-blue-600"
+                            >
+                                Start Tracking
+                            </button>
+                        </form>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50 p-4">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h1 className="text-3xl font-bold">🎓 College Placement Tracker</h1>
+                            <div className="text-sm text-gray-600">
+                                Welcome, {localStorage.getItem('user')}!
+                            </div>
+                        </div>
+
+                        {/* Navigation */}
+                        <div className="flex flex-wrap gap-2 mb-6 bg-white rounded-lg p-2 shadow">
+                            {[
+                                { id: 'dashboard', label: '📊 Dashboard' },
+                                { id: 'companies', label: '🏢 Companies' },
+                                { id: 'ai-tools', label: '🤖 AI Tools' }
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`px-4 py-2 rounded-md transition-colors ${
+                                        activeTab === tab.id
+                                            ? 'bg-blue-500 text-white'
+                                            : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Dashboard */}
+                        {activeTab === 'dashboard' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="bg-white p-6 rounded-xl shadow">
+                                    <h2 className="font-semibold mb-4">📄 Resume Quality</h2>
+                                    <input type="file" onChange={handleResumeUpload} className="mb-4" />
+                                    {resumeScore && (
+                                        <div className="bg-blue-50 p-3 rounded">
+                                            <p className="font-medium">AI Resume Score: {resumeScore}/100</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="bg-white p-6 rounded-xl shadow">
+                                    <h2 className="font-semibold mb-4">🧠 Aptitude Score</h2>
+                                    <input
+                                        type="number"
+                                        value={aptitude}
+                                        onChange={(e) => setAptitude(e.target.value)}
+                                        className="border p-3 rounded w-full"
+                                        placeholder="Enter score (0-100)"
+                                    />
+                                </div>
+
+                                <div className="bg-white p-6 rounded-xl shadow">
+                                    <h2 className="font-semibold mb-4">🎤 Interview Readiness</h2>
+                                    <input
+                                        type="number"
+                                        value={interviewRating}
+                                        onChange={(e) => setInterviewRating(e.target.value)}
+                                        className="border p-3 rounded w-full"
+                                        placeholder="Rating (0-100)"
+                                    />
+                                </div>
+
+                                <div className="bg-white p-6 rounded-xl shadow">
+                                    <h2 className="font-semibold mb-4">🤖 Voice Assistant</h2>
+                                    <button
+                                        onClick={startVoiceCommand}
+                                        disabled={listening}
+                                        className={`px-6 py-3 rounded-full font-medium w-full ${
+                                            listening 
+                                                ? 'bg-red-500 text-white animate-pulse' 
+                                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                                        }`}
+                                    >
+                                        {listening ? '🔴 Listening...' : '🎤 Voice Command'}
+                                    </button>
+                                    {voiceTranscript && (
+                                        <div className="bg-green-50 p-3 rounded mt-4">
+                                            <p className="text-sm">"{voiceTranscript}"</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="bg-white p-6 rounded-xl shadow">
+                                    <h2 className="font-semibold mb-4">📱 Notifications</h2>
+                                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                                        {notifications.length === 0 ? (
+                                            <p className="text-gray-500 text-sm">No notifications</p>
+                                        ) : (
+                                            notifications.map((notif) => (
+                                                <div key={notif.id} className="text-sm bg-gray-50 p-2 rounded">
+                                                    <p>{notif.message}</p>
+                                                    <p className="text-xs text-gray-500">{notif.time}</p>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="bg-white p-6 rounded-xl shadow col-span-full text-center">
+                                    <h2 className="font-semibold mb-4">🎯 Placement Readiness</h2>
+                                    <div className="text-4xl font-bold text-blue-600 mb-2">{readinessScore}/100</div>
+                                    <div className="text-sm text-gray-600">
+                                        {readinessScore >= 80 ? '🟢 Excellent - Ready for top companies!' :
+                                         readinessScore >= 60 ? '🟡 Good - Keep improving!' :
+                                         '🔴 Needs improvement'}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Companies */}
+                        {activeTab === 'companies' && (
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-bold">🏢 Available Companies</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {companies.map((company) => (
+                                        <div key={company.id} className="bg-white p-6 rounded-xl shadow">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <h3 className="font-bold text-xl">{company.name}</h3>
+                                                <span className="text-green-600 font-bold text-lg">{company.package}</span>
+                                            </div>
+                                            <p className="text-gray-600 mb-2">Deadline: {company.deadline}</p>
+                                            <p className="text-blue-600 mb-4">Type: {company.type}</p>
+                                            <button 
+                                                onClick={() => addNotification(`Applied to ${company.name}`)}
+                                                className="bg-blue-500 text-white px-6 py-3 rounded w-full hover:bg-blue-600"
+                                            >
+                                                Apply Now
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* AI Tools */}
+                        {activeTab === 'ai-tools' && (
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-bold">🤖 AI-Powered Tools</h2>
+                                
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {/* Image Analysis */}
+                                    <div className="bg-white p-6 rounded-xl shadow">
+                                        <h3 className="font-semibold mb-4">📸 Image-to-Text Analyzer</h3>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            accept="image/*"
+                                            className="mb-4"
+                                        />
+                                        <button
+                                            onClick={analyzeImage}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-600"
+                                        >
+                                            Analyze Image
+                                        </button>
+                                        {image && (
+                                            <img src={image} alt="Uploaded" className="w-full h-32 object-cover rounded mb-4" />
+                                        )}
+                                        {aiResult && (
+                                            <div className="bg-gray-50 p-3 rounded text-sm">
+                                                <strong>AI Analysis:</strong> {aiResult}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Text to Image */}
+                                    <div className="bg-white p-6 rounded-xl shadow">
+                                        <h3 className="font-semibold mb-4">🎨 Text-to-Image Generator</h3>
+                                        <textarea
+                                            placeholder="Describe what you want to visualize..."
+                                            className="w-full p-3 border rounded resize-none h-20 mb-4"
+                                        />
+                                        <button 
+                                            onClick={() => addNotification("Image generated successfully")}
+                                            className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+                                        >
+                                            Generate Image
+                                        </button>
+                                    </div>
+
+                                    {/* Image Enhancement */}
+                                    <div className="bg-white p-6 rounded-xl shadow">
+                                        <h3 className="font-semibold mb-4">✨ AI Image Enhancer</h3>
+                                        <input type="file" accept="image/*" className="mb-4" />
+                                        <select className="w-full p-2 border rounded mb-4">
+                                            <option>AI Upscaling (2x)</option>
+                                            <option>Noise Reduction</option>
+                                            <option>Sharpen Details</option>
+                                            <option>Remove Background</option>
+                                        </select>
+                                        <button 
+                                            onClick={() => addNotification("Image enhanced successfully")}
+                                            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                                        >
+                                            Enhance Image
+                                        </button>
+                                    </div>
+
+                                    {/* Real-time Intelligence */}
+                                    <div className="bg-white p-6 rounded-xl shadow">
+                                        <h3 className="font-semibold mb-4">🧠 Real-Time Intelligence</h3>
+                                        <button 
+                                            onClick={generateAIInsight}
+                                            className="bg-indigo-500 text-white px-4 py-2 rounded mb-4 hover:bg-indigo-600"
+                                        >
+                                            Generate AI Insights
+                                        </button>
+                                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                                            {aiInsights.map((insight) => (
+                                                <div key={insight.id} className="bg-blue-50 p-3 rounded text-sm">
+                                                    <p>{insight.result}</p>
+                                                    <p className="text-xs text-gray-500 mt-1">{insight.timestamp}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<CollegePlacementTracker />, document.getElementById('root'));
+    </script>
+</body>
+</html>

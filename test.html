@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 10px 0; }
+        button { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #2563eb; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 200px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🎓 College Placement Tracker</h1>
+    
+    <div class="card">
+        <h2>📄 Resume Upload</h2>
+        <input type="file" id="resume" />
+        <button onclick="uploadResume()">Upload & Analyze</button>
+        <div id="resumeResult"></div>
+    </div>
+
+    <div class="card">
+        <h2>🤖 AI Voice Assistant</h2>
+        <button onclick="startVoice()">🎤 Start Voice Command</button>
+        <div id="voiceResult"></div>
+    </div>
+
+    <div class="card">
+        <h2>📸 Image Analysis</h2>
+        <input type="file" id="imageFile" accept="image/*" />
+        <button onclick="analyzeImage()">Analyze Image</button>
+        <div id="imageResult"></div>
+    </div>
+
+    <div class="card">
+        <h2>🏢 Companies</h2>
+        <div id="companies">
+            <div style="border: 1px solid #ddd; padding: 10px; margin: 5px; border-radius: 5px;">
+                <strong>Google</strong> - 25 LPA
+                <button onclick="apply('Google')" style="float: right;">Apply</button>
+            </div>
+            <div style="border: 1px solid #ddd; padding: 10px; margin: 5px; border-radius: 5px;">
+                <strong>Microsoft</strong> - 22 LPA
+                <button onclick="apply('Microsoft')" style="float: right;">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function uploadResume() {
+            const score = Math.floor(Math.random() * 40) + 60;
+            document.getElementById('resumeResult').innerHTML = 
+                `<p style="color: green; margin-top: 10px;">✅ AI Resume Score: ${score}/100</p>`;
+        }
+
+        function startVoice() {
+            document.getElementById('voiceResult').innerHTML = 
+                '<p style="color: blue; margin-top: 10px;">🔴 Listening...</p>';
+            
+            setTimeout(() => {
+                const commands = [
+                    "Show my application status",
+                    "Schedule interview with Google",
+                    "Add JavaScript skill level 8"
+                ];
+                const command = commands[Math.floor(Math.random() * commands.length)];
+                document.getElementById('voiceResult').innerHTML = 
+                    `<p style="color: green; margin-top: 10px;">✅ Command: "${command}"</p>`;
+            }, 2000);
+        }
+
+        function analyzeImage() {
+            const results = [
+                "Resume Analysis: Strong technical background. Recommendation: Apply to mid-level positions.",
+                "Certificate Analysis: AWS certification detected. Relevant for cloud roles.",
+                "Project Screenshot: React application with modern UI. Good portfolio piece."
+            ];
+            const result = results[Math.floor(Math.random() * results.length)];
+            document.getElementById('imageResult').innerHTML = 
+                `<p style="color: green; margin-top: 10px;">🤖 AI Analysis: ${result}</p>`;
+        }
+
+        function apply(company) {
+            alert(`✅ Successfully applied to ${company}!`);
+        }
+    </script>
+</body>
+</html>

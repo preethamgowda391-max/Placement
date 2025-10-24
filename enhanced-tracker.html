@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced Placement Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 15px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        button { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #2563eb; }
+        input, textarea, select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; margin: 5px 0; }
+        .score { font-size: 24px; font-weight: bold; color: #059669; }
+        .improvement { background: #fef3c7; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .strength { background: #d1fae5; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .insight { background: #dbeafe; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .progress-bar { width: 100%; height: 20px; background: #e5e7eb; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #3b82f6; transition: width 0.3s; }
+        .item { border: 1px solid #e5e7eb; padding: 10px; margin: 5px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Enhanced College Placement Tracker</h1>
+            <p>AI-Powered Career Development Platform</p>
+        </div>
+
+        <div class="grid">
+            <!-- Resume Quality Tracker -->
+            <div class="card">
+                <h2>📄 Resume Quality Tracker</h2>
+                <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" />
+                <button onclick="analyzeResume()">🤖 AI Analysis</button>
+                
+                <div id="resumeResults">
+                    <div class="score" id="resumeScore">Score: --/100</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="resumeProgress" style="width: 0%"></div>
+                    </div>
+                    <div id="resumeFeedback"></div>
+                </div>
+            </div>
+
+            <!-- Aptitude Test Tracker -->
+            <div class="card">
+                <h2>🧠 Aptitude Test Tracker</h2>
+                <select id="testType">
+                    <option>Quantitative Aptitude</option>
+                    <option>Logical Reasoning</option>
+                    <option>Verbal Ability</option>
+                    <option>Technical Skills</option>
+                </select>
+                <input type="number" id="testScore" placeholder="Enter score (0-100)" />
+                <button onclick="addTestScore()">Add Score</button>
+                
+                <div id="testResults"></div>
+                <div id="improvements"></div>
+            </div>
+
+            <!-- Certifications & Projects -->
+            <div class="card">
+                <h2>🏆 Career Strengths</h2>
+                
+                <h3>Certifications</h3>
+                <input type="text" id="certName" placeholder="Certification name" />
+                <input type="text" id="certIssuer" placeholder="Issuing organization" />
+                <button onclick="addCertification()">Add Certification</button>
+                <div id="certifications"></div>
+
+                <h3>Projects</h3>
+                <input type="text" id="projectName" placeholder="Project name" />
+                <textarea id="projectDesc" placeholder="Project description" rows="2"></textarea>
+                <button onclick="addProject()">Add Project</button>
+                <div id="projects"></div>
+
+                <h3>Internships</h3>
+                <input type="text" id="internCompany" placeholder="Company name" />
+                <input type="text" id="internRole" placeholder="Role/Position" />
+                <button onclick="addInternship()">Add Internship</button>
+                <div id="internships"></div>
+            </div>
+
+            <!-- Interview Readiness -->
+            <div class="card">
+                <h2>🎤 Interview Readiness</h2>
+                
+                <button onclick="startMockInterview()">🎯 Start Mock Interview</button>
+                <button onclick="assessCommunication()">💬 Communication Assessment</button>
+                
+                <div id="interviewResults">
+                    <div class="score" id="interviewScore">Readiness: --/100</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="interviewProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div id="interviewInsights"></div>
+            </div>
+        </div>
+
+        <!-- Overall Dashboard -->
+        <div class="card">
+            <h2>📊 Overall Career Readiness Dashboard</h2>
+            <div class="grid">
+                <div>
+                    <h3>Resume Quality</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="overallResume" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3>Technical Skills</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="overallTechnical" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3>Interview Skills</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="overallInterview" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3>Experience</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="overallExperience" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="score" id="overallScore">Overall Readiness: --/100</div>
+        </div>
+    </div>
+
+    <script>
+        let data = {
+            resume: { score: 0, feedback: [] },
+            tests: [],
+            certifications: [],
+            projects: [],
+            internships: [],
+            interview: { score: 0, insights: [] }
+        };
+
+        function analyzeResume() {
+            const file = document.getElementById('resumeFile').files[0];
+            if (!file) return alert('Please select a resume file');
+            
+            // Simulate AI analysis
+            setTimeout(() => {
+                const score = Math.floor(Math.random() * 30) + 70;
+                const feedback = [
+                    score > 85 ? "✅ Excellent formatting and structure" : "⚠️ Improve formatting and layout",
+                    score > 80 ? "✅ Strong technical keywords" : "⚠️ Add more relevant technical keywords",
+                    score > 75 ? "✅ Good project descriptions" : "⚠️ Enhance project descriptions with metrics",
+                    score > 70 ? "✅ Appropriate length" : "⚠️ Optimize resume length (1-2 pages)"
+                ];
+                
+                data.resume = { score, feedback };
+                updateResumeDisplay();
+                updateOverallScore();
+            }, 2000);
+        }
+
+        function updateResumeDisplay() {
+            document.getElementById('resumeScore').textContent = `Score: ${data.resume.score}/100`;
+            document.getElementById('resumeProgress').style.width = `${data.resume.score}%`;
+            
+            const feedbackHtml = data.resume.feedback.map(f => 
+                `<div class="${f.includes('✅') ? 'strength' : 'improvement'}">${f}</div>`
+            ).join('');
+            document.getElementById('resumeFeedback').innerHTML = feedbackHtml;
+        }
+
+        function addTestScore() {
+            const type = document.getElementById('testType').value;
+            const score = parseInt(document.getElementById('testScore').value);
+            
+            if (!score || score < 0 || score > 100) return alert('Enter valid score (0-100)');
+            
+            data.tests.push({ type, score, date: new Date().toLocaleDateString() });
+            updateTestDisplay();
+            updateOverallScore();
+            
+            document.getElementById('testScore').value = '';
+        }
+
+        function updateTestDisplay() {
+            const testsHtml = data.tests.map(test => `
+                <div class="item">
+                    <strong>${test.type}</strong>: ${test.score}/100 (${test.date})
+                    <div class="progress-bar" style="margin-top: 5px;">
+                        <div class="progress-fill" style="width: ${test.score}%"></div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('testResults').innerHTML = testsHtml;
+            
+            // Generate improvements
+            const avgScore = data.tests.reduce((sum, test) => sum + test.score, 0) / data.tests.length;
+            const improvements = [];
+            
+            if (avgScore < 70) improvements.push("📚 Focus on fundamental concepts and practice more questions");
+            if (avgScore < 80) improvements.push("⏱️ Work on time management during tests");
+            if (avgScore < 90) improvements.push("🎯 Practice advanced problem-solving techniques");
+            
+            const improvementsHtml = improvements.map(imp => 
+                `<div class="improvement">${imp}</div>`
+            ).join('');
+            document.getElementById('improvements').innerHTML = improvementsHtml;
+        }
+
+        function addCertification() {
+            const name = document.getElementById('certName').value;
+            const issuer = document.getElementById('certIssuer').value;
+            
+            if (!name || !issuer) return alert('Fill all certification fields');
+            
+            data.certifications.push({ name, issuer, date: new Date().toLocaleDateString() });
+            updateCertificationsDisplay();
+            updateOverallScore();
+            
+            document.getElementById('certName').value = '';
+            document.getElementById('certIssuer').value = '';
+        }
+
+        function updateCertificationsDisplay() {
+            const html = data.certifications.map(cert => `
+                <div class="item strength">
+                    <strong>${cert.name}</strong><br>
+                    Issued by: ${cert.issuer} (${cert.date})
+                </div>
+            `).join('');
+            document.getElementById('certifications').innerHTML = html;
+        }
+
+        function addProject() {
+            const name = document.getElementById('projectName').value;
+            const desc = document.getElementById('projectDesc').value;
+            
+            if (!name || !desc) return alert('Fill all project fields');
+            
+            data.projects.push({ name, desc, date: new Date().toLocaleDateString() });
+            updateProjectsDisplay();
+            updateOverallScore();
+            
+            document.getElementById('projectName').value = '';
+            document.getElementById('projectDesc').value = '';
+        }
+
+        function updateProjectsDisplay() {
+            const html = data.projects.map(project => `
+                <div class="item strength">
+                    <strong>${project.name}</strong><br>
+                    ${project.desc} (${project.date})
+                </div>
+            `).join('');
+            document.getElementById('projects').innerHTML = html;
+        }
+
+        function addInternship() {
+            const company = document.getElementById('internCompany').value;
+            const role = document.getElementById('internRole').value;
+            
+            if (!company || !role) return alert('Fill all internship fields');
+            
+            data.internships.push({ company, role, date: new Date().toLocaleDateString() });
+            updateInternshipsDisplay();
+            updateOverallScore();
+            
+            document.getElementById('internCompany').value = '';
+            document.getElementById('internRole').value = '';
+        }
+
+        function updateInternshipsDisplay() {
+            const html = data.internships.map(intern => `
+                <div class="item strength">
+                    <strong>${intern.role}</strong> at ${intern.company}<br>
+                    Added: ${intern.date}
+                </div>
+            `).join('');
+            document.getElementById('internships').innerHTML = html;
+        }
+
+        function startMockInterview() {
+            // Simulate mock interview
+            setTimeout(() => {
+                const score = Math.floor(Math.random() * 25) + 70;
+                const insights = [
+                    "💪 Strong technical knowledge demonstrated",
+                    score > 80 ? "✅ Good communication clarity" : "⚠️ Work on communication clarity",
+                    score > 85 ? "✅ Confident body language" : "⚠️ Practice confident body language",
+                    "🎯 Good problem-solving approach"
+                ];
+                
+                data.interview.score = Math.max(data.interview.score, score);
+                data.interview.insights = insights;
+                updateInterviewDisplay();
+                updateOverallScore();
+            }, 3000);
+        }
+
+        function assessCommunication() {
+            const score = Math.floor(Math.random() * 20) + 75;
+            const insights = [
+                "🗣️ Communication Assessment Complete",
+                score > 85 ? "✅ Excellent verbal communication" : "⚠️ Practice speaking more clearly",
+                score > 80 ? "✅ Good listening skills" : "⚠️ Improve active listening",
+                "📝 Consider joining communication workshops"
+            ];
+            
+            data.interview.insights = [...data.interview.insights, ...insights];
+            updateInterviewDisplay();
+        }
+
+        function updateInterviewDisplay() {
+            document.getElementById('interviewScore').textContent = `Readiness: ${data.interview.score}/100`;
+            document.getElementById('interviewProgress').style.width = `${data.interview.score}%`;
+            
+            const insightsHtml = data.interview.insights.map(insight => 
+                `<div class="insight">${insight}</div>`
+            ).join('');
+            document.getElementById('interviewInsights').innerHTML = insightsHtml;
+        }
+
+        function updateOverallScore() {
+            const resumeScore = data.resume.score || 0;
+            const avgTestScore = data.tests.length ? 
+                data.tests.reduce((sum, test) => sum + test.score, 0) / data.tests.length : 0;
+            const experienceScore = (data.certifications.length * 10) + (data.projects.length * 15) + (data.internships.length * 20);
+            const interviewScore = data.interview.score || 0;
+            
+            const overall = Math.round((resumeScore * 0.3) + (avgTestScore * 0.3) + (Math.min(experienceScore, 100) * 0.2) + (interviewScore * 0.2));
+            
+            document.getElementById('overallResume').style.width = `${resumeScore}%`;
+            document.getElementById('overallTechnical').style.width = `${avgTestScore}%`;
+            document.getElementById('overallInterview').style.width = `${interviewScore}%`;
+            document.getElementById('overallExperience').style.width = `${Math.min(experienceScore, 100)}%`;
+            document.getElementById('overallScore').textContent = `Overall Readiness: ${overall}/100`;
+        }
+    </script>
+</body>
+</html>
